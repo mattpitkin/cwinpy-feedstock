@@ -1,5 +1,5 @@
 {% set name = "cwinpy" %}
-{% set version = "1.4.2" %}
+{% set version = "1.5.0" %}
 
 package:
   name: {{ name|lower }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 9e75343fdf4fcd5a95e09c78db0eb16400bb6a35072a7493fb3b0f862d07de7f
+  sha256: 43dbec0b97663111b37b68d7ad5042fb5fb8db9fdab6f825c814d6210788c3f6
   patches:
     # to update the patches for a new release:
     #
@@ -81,6 +81,7 @@ requirements:
     - python-lalframe >=2.0.3
     - python-lalpulsar >=5.0.2
     - requests
+    - requests-pelican
     - scipy
     - simpleeval
     - solar_system_ephemerides >=1.0.0
