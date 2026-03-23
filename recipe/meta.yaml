@@ -31,8 +31,6 @@ source:
     - patches/0001-Remove-lalsuite-Python-requirement.patch
     # patch test to survive no internet connection
     - patches/0002-Handle-no-internet-connection-in-test.patch
-    # patch tests that require libstempo
-    - patches/0003-Add-pytest.mark.xfail-to-tempo2-tests.patch
 
 build:
   entry_points:
