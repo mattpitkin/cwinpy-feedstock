@@ -1,12 +1,15 @@
-{% set name = "cwinpy" %}
-{% set version = "1.5.0" %}
+schema_version: 1
+
+context:
+  name: cwinpy
+  version: 1.5.0
 
 package:
-  name: {{ name|lower }}
-  version: {{ version }}
+  name: ${{ name|lower }}
+  version: ${{ version }}
 
 source:
-  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  url: https://pypi.org/packages/source/${{ name[0] }}/${{ name }}/${{ name }}-${{ version }}.tar.gz
   sha256: 43dbec0b97663111b37b68d7ad5042fb5fb8db9fdab6f825c814d6210788c3f6
   patches:
     # to update the patches for a new release:
@@ -33,23 +36,30 @@ source:
     - patches/0002-Handle-no-internet-connection-in-test.patch
 
 build:
-  entry_points:
-    - cwinpy_pe = cwinpy.pe.pe:pe_cli
-    - cwinpy_pe_pipeline = cwinpy.pe.pe:pe_pipeline_cli
-    - cwinpy_pe_generate_pp_plots = cwinpy.pe.testing:generate_pp_plots
-  number: 0
-  script: {{ PYTHON }} -m pip install . -vv
   # requirements aren't available for Windows, aarch64 or python>3.12
-  skip: true  # [win or aarch64 or ppc64le or py>=313]
+  number: 0
+  python:
+    entry_points:
+      - cwinpy_pe = cwinpy.pe.pe:pe_cli
+      - cwinpy_pe_pipeline = cwinpy.pe.pe:pe_pipeline_cli
+      - cwinpy_pe_generate_pp_plots = cwinpy.pe.testing:generate_pp_plots
+  script: ${{ PYTHON }} -m pip install . -vv
+  skip:
+    - match(python, ">=3.13")
+    - aarch64
+    - ppc64le
+    - win
 
 requirements:
   build:
-    - {{ compiler("c") }}
-    - {{ stdlib("c") }}
-    - python                                 # [build_platform != target_platform]
-    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
-    - cython >=3                             # [build_platform != target_platform]
-    - numpy                                  # [build_platform != target_platform]
+    - ${{ compiler("c") }}
+    - ${{ stdlib("c") }}
+    - if: build_platform != target_platform
+      then:
+        - cross-python_${{ target_platform }}
+        - cython >=3
+        - numpy
+        - python
   host:
     - cython >=3
     - numpy
@@ -84,54 +94,48 @@ requirements:
     - simpleeval
     - solar_system_ephemerides >=1.0.0
 
-test:
-  requires:
-    - {{ compiler("c") }}
-    - {{ compiler('cxx') }}
-    - {{ stdlib("c") }}
-    - python  # [build_platform != target_platform]
-    - cross-python_{{ target_platform }}  # [build_platform != target_platform]
-    - numpy  # [build_platform != target_platform]
-    - astropy-base >=4.1
-    - ephem >=3.7.7.1
-    - pyerfa
-    - cython >=3
-    - git
-    - arby
-    - cweqgen >=0.4.4
-    - healpy
-    - httpretty
-    - libstempo >=2.4.2  # [not arm64]
-    - lalapps
-    - pesummary >=1.3.2
-    - pip
-    - pytest >=4.6
-    - pytest-astropy
-    - pytest-socket
-    - seaborn
-    - tempo2 =2025.02.1  # [not arm64]
-  commands:
-    # check requirements
-    - python -m pip check  # [not arm64]
-    # run unit tests
-    - python -m pytest --pyargs cwinpy.test -ra  # [build_platform == target_platform]
-    # check entry points
-    - cwinpy_pe --help
-    - cwinpy_pe_pipeline --help
-    - cwinpy_pe_generate_pp_plots --help
+tests:
+  - requirements:
+      run:
+        - cweqgen >=0.4.4
+        - ephem >=3.7.7.1
+        - git
+        - httpretty
+        - lalapps
+        - pesummary >=1.3.2
+        - pip
+        - pyerfa
+        - pytest >=4.6
+        - pytest-astropy
+        - pytest-socket
+        - seaborn
+        - if: not arm64
+          then:
+            - libstempo >=2.4.2
+            - tempo2 =2025.02.1
+    script:
+      # Check metadata
+      - python -m pip check
+      # Run test suite (only native builds)
+      - if: build_platform == target_platform
+        then: python -m pytest --pyargs cwinpy.test -ra
+      # Check entry points
+      - cwinpy_pe --help
+      - cwinpy_pe_pipeline --help
+      - cwinpy_pe_generate_pp_plots --help
 
 about:
-  home: https://github.com/cwinpy/cwinpy/
-  doc_url: https://cwinpy.readthedocs.io/
-  dev_url: https://git.ligo.org/cwinpy/cwinpy
-  license: MIT
-  license_file: LICENSE
   summary: CW Inference in Python
   description: |
     A Python module for performing Bayesian inference for
     continuous gravitational-wave signals from pulsars.
+  homepage: https://github.com/cwinpy/cwinpy/
+  repository: https://git.ligo.org/cwinpy/cwinpy
+  documentation: https://cwinpy.readthedocs.io/
+  license: MIT
+  license_file: LICENSE
 
 extra:
   recipe-maintainers:
-    - mattpitkin
     - duncanmmacleod
+    - mattpitkin
