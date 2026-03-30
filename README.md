@@ -16,7 +16,6 @@ Documentation: https://cwinpy.readthedocs.io/
 A Python module for performing Bayesian inference for
 continuous gravitational-wave signals from pulsars.
 
-
 Current build status
 ====================
 
