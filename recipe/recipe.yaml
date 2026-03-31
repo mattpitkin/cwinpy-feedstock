@@ -39,9 +39,16 @@ build:
   number: 0
   python:
     entry_points:
+      - cwinpy_generate_summary_pages = cwinpy.pe.summary:generate_summary_pages_cli
+      - cwinpy_heterodyne = cwinpy.heterodyne.heterodyne:heterodyne_cli
+      - cwinpy_heterodyne_merge = cwinpy.heterodyne.heterodyne:heterodyne_merge_cli
+      - cwinpy_heterodyne_pipeline = cwinpy.heterodyne.heterodyne:heterodyne_pipeline_cli
+      - cwinpy_knope = cwinpy.knope.knope:knope_cli
+      - cwinpy_knope_pipeline = cwinpy.knope.knope:knope_pipeline_cli
       - cwinpy_pe = cwinpy.pe.pe:pe_cli
-      - cwinpy_pe_pipeline = cwinpy.pe.pe:pe_pipeline_cli
       - cwinpy_pe_generate_pp_plots = cwinpy.pe.testing:generate_pp_plots
+      - cwinpy_pe_pipeline = cwinpy.pe.pe:pe_pipeline_cli
+      - cwinpy_skyshift_pipeline = cwinpy.knope.skyshift:skyshift_pipeline_cli
   script: ${{ PYTHON }} -m pip install . -vv
   skip:
     - match(python, ">=3.14")
@@ -120,9 +127,16 @@ tests:
       - if: build_platform == target_platform
         then: python -m pytest --pyargs cwinpy.test -ra
       # Check entry points
+      - cwinpy_generate_summary_pages --help
+      - cwinpy_heterodyne --help
+      - cwinpy_heterodyne_merge --help
+      - cwinpy_heterodyne_pipeline --help
+      - cwinpy_knope --help
+      - cwinpy_knope_pipeline --help
       - cwinpy_pe --help
-      - cwinpy_pe_pipeline --help
       - cwinpy_pe_generate_pp_plots --help
+      - cwinpy_pe_pipeline --help
+      - cwinpy_skyshift_pipeline --help
 
 about:
   summary: CW Inference in Python
