@@ -1,0 +1,155 @@
+schema_version: 1
+
+context:
+  name: cwinpy
+  version: 1.5.0
+
+package:
+  name: ${{ name|lower }}
+  version: ${{ version }}
+
+source:
+  url: https://pypi.org/packages/source/${{ name[0] }}/${{ name }}/${{ name }}-${{ version }}.tar.gz
+  sha256: 43dbec0b97663111b37b68d7ad5042fb5fb8db9fdab6f825c814d6210788c3f6
+  patches:
+    # to update the patches for a new release:
+    #
+    #     # -- checkout the new source release tag
+    #     cd /path/to/git/cwinpy
+    #     git fetch
+    #     git checkout <release-tag>
+    #     # -- apply the patches on top of the release tag
+    #     git am --3way /path/to/git/cwinpy-feedstock/recipe/patches/*.patch
+    #     <resolve-any-conflicts>
+    #     # -- render new patch files
+    #     git format-patch <release-tag>
+    #     # -- copy them back to the feedstock
+    #     cd /path/to/git/cwinpy-feedstock
+    #     git rm recipe/patches/*.patch
+    #     cp /path/to/git/cwinpy/*.patch recipe/patches/
+    #     git add recipe/patches/*.patch
+    #     <update-this-file-as-required>
+
+    # remove lalsuite requirement
+    - patches/0001-Remove-lalsuite-Python-requirement.patch
+    # patch test to survive no internet connection
+    - patches/0002-Handle-no-internet-connection-in-test.patch
+
+build:
+  number: 0
+  python:
+    entry_points:
+      - cwinpy_generate_summary_pages = cwinpy.pe.summary:generate_summary_pages_cli
+      - cwinpy_heterodyne = cwinpy.heterodyne.heterodyne:heterodyne_cli
+      - cwinpy_heterodyne_merge = cwinpy.heterodyne.heterodyne:heterodyne_merge_cli
+      - cwinpy_heterodyne_pipeline = cwinpy.heterodyne.heterodyne:heterodyne_pipeline_cli
+      - cwinpy_knope = cwinpy.knope.knope:knope_cli
+      - cwinpy_knope_pipeline = cwinpy.knope.knope:knope_pipeline_cli
+      - cwinpy_pe = cwinpy.pe.pe:pe_cli
+      - cwinpy_pe_generate_pp_plots = cwinpy.pe.testing:generate_pp_plots
+      - cwinpy_pe_pipeline = cwinpy.pe.pe:pe_pipeline_cli
+      - cwinpy_skyshift_pipeline = cwinpy.knope.skyshift:skyshift_pipeline_cli
+  script: ${{ PYTHON }} -m pip install . -vv
+  skip:
+    - match(python, ">=3.14")
+    - win
+
+requirements:
+  build:
+    - ${{ compiler("c") }}
+    - ${{ stdlib("c") }}
+    - if: build_platform != target_platform
+      then:
+        - cross-python_${{ target_platform }}
+        - cython >=3
+        - numpy
+        - python
+  host:
+    - cython >=3
+    - numpy
+    - pip
+    - python
+    - setuptools >=61
+    - setuptools_scm >=6.2
+  run:
+    - appdirs
+    - arby
+    - astropy-base
+    - bilby >=2.0.1
+    - configargparse
+    - corner >=2.2.1
+    - gwosc >=0.5.4
+    - gwpy >=2.1.1
+    - healpy
+    - lintegrate >=0.1.7
+    - matplotlib-base >=3.6.0
+    - numba >=0.5.0
+    - numpy >=1.17.0
+    - pesummary >=1.2.0
+    - psrqpy >=1.1.7
+    - python
+    - python-htcondor >=10.0.0
+    - python-lal >=7.2.2
+    - python-lalframe >=2.0.3
+    - python-lalpulsar >=5.0.2
+    - requests
+    - requests-pelican
+    - scipy
+    - simpleeval
+    - solar_system_ephemerides >=1.0.0
+  run_constraints:
+    - if: match(python, "<=3.10")
+      then: scipy <1.15.0a0
+
+tests:
+  - requirements:
+      run:
+        - cweqgen >=0.4.4
+        - ephem >=3.7.7.1
+        - git
+        - httpretty
+        - lalapps
+        - pesummary >=1.3.2
+        - pip
+        - pyerfa
+        - pytest >=4.6
+        - pytest-astropy
+        - pytest-socket
+        - seaborn
+        - if: not arm64
+          then:
+            - libstempo >=2.4.2
+            - tempo2 =2025.02.1
+    script:
+      # Check metadata
+      - python -m pip check
+      # Run test suite (only native builds)
+      - if: build_platform == target_platform
+        then: python -m pytest --pyargs cwinpy.test -ra
+      # Check entry points
+      - cwinpy_generate_summary_pages --help
+      - cwinpy_heterodyne --help
+      - cwinpy_heterodyne_merge --help
+      - cwinpy_heterodyne_pipeline --help
+      - cwinpy_knope --help
+      - cwinpy_knope_pipeline --help
+      - cwinpy_pe --help
+      - cwinpy_pe_generate_pp_plots --help
+      - cwinpy_pe_pipeline --help
+      - cwinpy_skyshift_pipeline --help
+
+about:
+  summary: CW Inference in Python
+  description: |
+    A Python module for performing Bayesian inference for
+    continuous gravitational-wave signals from pulsars.
+  homepage: https://github.com/cwinpy/cwinpy/
+  repository: https://git.ligo.org/cwinpy/cwinpy
+  documentation: https://cwinpy.readthedocs.io/
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - duncanmmacleod
+    - mattpitkin
