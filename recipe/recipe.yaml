@@ -15,18 +15,18 @@ source:
     # to update the patches for a new release:
     #
     #     # -- checkout the new source release tag
-    #     cd /path/to/git/pycbc
+    #     cd /path/to/git/cwinpy
     #     git fetch
     #     git checkout <release-tag>
     #     # -- apply the patches on top of the release tag
-    #     git am --3way /path/to/git/pycbc-feedstock/recipe/patches/*.patch
+    #     git am --3way /path/to/git/cwinpy-feedstock/recipe/patches/*.patch
     #     <resolve-any-conflicts>
     #     # -- render new patch files
     #     git format-patch <release-tag>
     #     # -- copy them back to the feedstock
-    #     cd /path/to/git/pycbc-feedstock
+    #     cd /path/to/git/cwinpy-feedstock
     #     git rm recipe/patches/*.patch
-    #     cp /path/to/git/pycbc/*.patch recipe/patches/
+    #     cp /path/to/git/cwinpy/*.patch recipe/patches/
     #     git add recipe/patches/*.patch
     #     <update-this-file-as-required>
 
@@ -36,7 +36,6 @@ source:
     - patches/0002-Handle-no-internet-connection-in-test.patch
 
 build:
-  # requirements aren't available for Windows, aarch64 or python>3.12
   number: 0
   python:
     entry_points:
