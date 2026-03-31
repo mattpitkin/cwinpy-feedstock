@@ -46,8 +46,6 @@ build:
   script: ${{ PYTHON }} -m pip install . -vv
   skip:
     - match(python, ">=3.13")
-    - aarch64
-    - ppc64le
     - win
 
 requirements:
